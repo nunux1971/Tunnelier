@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Tunnelier
+GenericName=Client VPN
+Comment=Se connecter aux serveurs CyberGhost (OpenVPN / WireGuard)
+Exec=tunnelier %F
+Icon=io.github.tunnelier.Tunnelier
+Terminal=false
+Categories=Network;Security;GTK;
+Keywords=vpn;cyberghost;openvpn;wireguard;
+MimeType=application/x-openvpn-profile;
+StartupNotify=true
