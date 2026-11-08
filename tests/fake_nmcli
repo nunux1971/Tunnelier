@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+import sys, json, os, uuid
+db = os.environ["FAKE_NM_DB"]
+st = json.load(open(db)) if os.path.exists(db) else {"conns": {}, "active": {}, "log": []}
+a = sys.argv[1:]; st["log"].append(a)
+def save(): json.dump(st, open(db, "w"))
+if a[:2] == ["connection", "import"]:
+    path = a[a.index("file")+1]
+    if not os.path.exists(path): print("Error: file not found", file=sys.stderr); save(); sys.exit(1)
+    u = str(uuid.uuid4()); st["conns"][u] = {"file": path, "type": a[3]}
+    print(f"Connection 'x' ({u}) successfully added."); save(); sys.exit(0)
+if a[:2] == ["connection", "modify"]:
+    st["conns"][a[3]].setdefault("mod", []).extend(a[4:]); save(); sys.exit(0)
+if a[:2] == ["connection", "up"]:
+    if os.environ.get("FAKE_FAIL"): print("Error: Connection activation failed: auth failed", file=sys.stderr); save(); sys.exit(4)
+    st["active"][a[3]] = "activated"
+    if "passwd-file" in a: st["last_pw"] = open(a[a.index("passwd-file")+1]).read()
+    save(); sys.exit(0)
+if a[:2] == ["connection", "down"]:
+    if a[3] not in st["active"]: print("Error: not an active connection", file=sys.stderr); save(); sys.exit(10)
+    st["active"].pop(a[3]); save(); sys.exit(0)
+if a[:2] == ["connection", "delete"]:
+    st["conns"].pop(a[3], None); save(); sys.exit(0)
+if "--active" in a:
+    for u, s in st["active"].items(): print(f"{u}:{s}")
+    save(); sys.exit(0)
+save(); sys.exit(0)
